@@ -2,6 +2,9 @@
   "name": "papi-101",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "postinstall": "papi"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -9,6 +12,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@polkadot-api/descriptors": "file:.papi/descriptors",
     "polkadot-api": "^1.4.1"
   }
 }
