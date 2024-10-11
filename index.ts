@@ -1,10 +1,11 @@
 import { getWsProvider } from "polkadot-api/ws-provider/web";
 import {
   createClient,
+  type FixedSizeBinary,
   type PolkadotClient,
   type SS58String,
 } from "polkadot-api";
-import { dot } from "@polkadot-api/descriptors";
+import { dot, people } from "@polkadot-api/descriptors";
 
 function makeClient(endpoint: string): PolkadotClient {
   console.info("Connecting to ", endpoint);
@@ -37,13 +38,32 @@ async function getBalance(
   return free + reserved;
 }
 
+async function getDisplayName(
+  peopleClient: PolkadotClient,
+  address: SS58String
+): Promise<string | undefined> {
+  const peopleApi = peopleClient.getTypedApi(people);
+  const accountInfo = await peopleApi.query.Identity.IdentityOf.getValue(
+    address
+  );
+  const displayName = accountInfo?.[0].info.display.value;
+  return (displayName as FixedSizeBinary<any>)?.asText();
+}
+
 async function main() {
+  // Set up clients
   const polkadotClient = makeClient("wss://rpc.polkadot.io");
   await printChainInfo(polkadotClient);
 
+  const peopleClient = makeClient("wss://polkadot-people-rpc.polkadot.io");
+  await printChainInfo(peopleClient);
+
+  // Chain interactions
   const address = "15DCZocYEM2ThYCAj22QE4QENRvUNVrDtoLBVbCm5x4EQncr";
   const balance = await getBalance(polkadotClient, address);
-  console.log(`Balance of account ${address} is ${balance}`);
+  const display = await getDisplayName(peopleClient, address);
+
+  console.log(`Balance of account ${address} (${display}) is ${balance}`);
 }
 
 main();
