@@ -8,9 +8,23 @@ function makeClient(endpoint: string): PolkadotClient {
   return client;
 }
 
+async function printChainInfo(client: PolkadotClient) {
+  // DO NOT use `getChainSpecData` in production apps
+  const chainSpec = await client.getChainSpecData();
+
+  const finalizedBlock = await client.getFinalizedBlock();
+
+  console.info(
+    "Chain: ",
+    chainSpec.name,
+    "\nLatest finalized block: ",
+    finalizedBlock
+  );
+}
+
 async function main() {
   const polkadotClient = makeClient("wss://rpc.polkadot.io");
-  console.log({ polkadotClient });
+  await printChainInfo(polkadotClient);
 }
 
 main();
